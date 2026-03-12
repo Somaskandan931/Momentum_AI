@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+*.egg-info/
+
+# Models (trained weights — download separately)
+models/*.pkl
+models/*.zip
+models/*.pt
+
+# Node
+node_modules/
+build/
+dist/
+
+# Data
+data/training_data/*.csv
+
+# IDE
+.vscode/
+.idea/
+
+# Colab
+*.ipynb_checkpoints/
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Tokens
+token.json
+credentials.json

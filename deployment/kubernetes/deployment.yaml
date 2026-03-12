@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: momentum-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: momentum-backend
+  template:
+    metadata:
+      labels:
+        app: momentum-backend
+    spec:
+      containers:
+        - name: backend
+          image: momentum-ai-backend:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: momentum-secrets
+                  key: mongo-uri
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: momentum-secrets
+                  key: secret-key
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: momentum-secrets
+                  key: openai-api-key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: momentum-backend-service
+spec:
+  selector:
+    app: momentum-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: momentum-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: momentum-frontend
+  template:
+    metadata:
+      labels:
+        app: momentum-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: momentum-ai-frontend:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: momentum-frontend-service
+spec:
+  selector:
+    app: momentum-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer

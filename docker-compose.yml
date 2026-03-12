@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: momentum_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: momentum_ai
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../deployment/Dockerfile.backend
+    container_name: momentum_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/momentum_ai
+      - SECRET_KEY=${SECRET_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_CALENDAR_API_KEY=${GOOGLE_CALENDAR_API_KEY}
+    depends_on:
+      - mongodb
+    volumes:
+      - ./models:/app/models
+      - ./ai_engine:/app/ai_engine
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../deployment/Dockerfile.frontend
+    container_name: momentum_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
