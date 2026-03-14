@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
+
 class TaskCreate(BaseModel):
     project_id: str
     title: str
@@ -11,6 +12,7 @@ class TaskCreate(BaseModel):
     deadline: Optional[datetime] = None
     estimated_time: int = 60  # minutes
 
+
 class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
@@ -18,6 +20,7 @@ class TaskUpdate(BaseModel):
     assigned_to: Optional[str] = None
     status: Optional[str] = None
     deadline: Optional[datetime] = None
+
 
 class TaskOut(BaseModel):
     id: str
@@ -30,6 +33,7 @@ class TaskOut(BaseModel):
     deadline: Optional[datetime]
     estimated_time: int
     created_by_ai: bool
+
 
 class TaskInDB(BaseModel):
     project_id: str

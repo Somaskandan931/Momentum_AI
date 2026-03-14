@@ -13,7 +13,7 @@ export default function SurvivalScore({ projectId }) {
     try {
       const { data } = await getSurvivalScore(projectId);
       setScore(data.idea_survival_score);
-    } catch (err) {
+    } catch {
       setError("Could not compute score.");
     } finally {
       setLoading(false);
@@ -23,84 +23,71 @@ export default function SurvivalScore({ projectId }) {
   const label = score !== null ? survivalScoreLabel(score) : null;
   const filled = score !== null ? Math.round(score) : 0;
 
+  const arcColors = { Strong: "#34d399", Moderate: "#fbbf24", "At Risk": "#f87171" };
+  const arcColor = label ? arcColors[label.label] : "var(--accent)";
+
   return (
-    <div style={{ padding: "1rem", background: "#f8f9fa", borderRadius: "8px", maxWidth: "320px" }}>
-      <h4 style={{ margin: "0 0 12px", color: "#2c3e50" }}>Idea Survival Score</h4>
+    <div className="card">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <h4 style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-2)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          Survival Score
+        </h4>
+        {score !== null && (
+          <button className="btn-ghost" onClick={fetchScore} style={{ padding: "4px 10px", fontSize: "11px" }}>
+            Refresh
+          </button>
+        )}
+      </div>
 
       {score === null ? (
-        <button
-          onClick={fetchScore}
-          disabled={loading}
-          style={{
-            background: "#1a1a2e",
-            color: "#fff",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontSize: "0.9rem",
-          }}
-        >
-          {loading ? "Computing..." : "Compute Score"}
-        </button>
+        <div style={{ textAlign: "center", padding: "1rem 0" }}>
+          <p style={{ fontSize: "12px", color: "var(--text-3)", marginBottom: "1rem" }}>
+            AI analysis of your project's viability
+          </p>
+          <button
+            className="btn-primary"
+            onClick={fetchScore}
+            disabled={loading}
+            style={{ width: "100%", padding: "10px" }}
+          >
+            {loading ? "Analyzing..." : "Compute Score"}
+          </button>
+        </div>
       ) : (
         <div>
-          <div style={{ fontSize: "2.5rem", fontWeight: 700, color: label.color }}>
-            {filled}
-            <span style={{ fontSize: "1rem", fontWeight: 400, color: "#95a5a6" }}>/100</span>
+          {/* Score display */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: "6px", marginBottom: "10px" }}>
+            <span style={{ fontSize: "3rem", fontWeight: 600, color: arcColor, letterSpacing: "-0.04em" }}>{filled}</span>
+            <span style={{ fontSize: "14px", color: "var(--text-3)" }}>/100</span>
           </div>
 
           {/* Progress bar */}
-          <div style={{ background: "#dde1e7", borderRadius: "4px", height: "8px", margin: "8px 0" }}>
-            <div
-              style={{
-                width: `${filled}%`,
-                height: "100%",
-                background: label.color,
-                borderRadius: "4px",
-                transition: "width 0.5s ease",
-              }}
-            />
+          <div style={{ height: "4px", background: "var(--bg-input)", borderRadius: "2px", marginBottom: "10px", overflow: "hidden" }}>
+            <div style={{
+              width: `${filled}%`, height: "100%",
+              background: arcColor, borderRadius: "2px",
+              transition: "width 0.6s ease",
+            }} />
           </div>
 
-          <span
-            style={{
-              fontSize: "0.85rem",
-              fontWeight: 600,
-              color: label.color,
-              background: label.color + "18",
-              padding: "3px 10px",
-              borderRadius: "12px",
-            }}
-          >
+          <span style={{
+            display: "inline-block", fontSize: "11px", fontWeight: 600,
+            color: arcColor, background: `${arcColor}18`,
+            padding: "3px 10px", borderRadius: "20px",
+            textTransform: "uppercase", letterSpacing: "0.04em",
+          }}>
             {label.label}
           </span>
 
           {score < 50 && (
-            <p style={{ fontSize: "0.8rem", color: "#7f8c8d", marginTop: "10px" }}>
-              Consider reducing project scope or adding more collaborators to improve your score.
+            <p style={{ fontSize: "12px", color: "var(--text-3)", marginTop: "10px", lineHeight: 1.5 }}>
+              Consider reducing scope or adding collaborators.
             </p>
           )}
-
-          <button
-            onClick={fetchScore}
-            style={{
-              marginTop: "10px",
-              background: "transparent",
-              border: "1px solid #dde1e7",
-              padding: "5px 10px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "0.8rem",
-              color: "#555",
-            }}
-          >
-            Refresh
-          </button>
         </div>
       )}
 
-      {error && <p style={{ color: "#e74c3c", fontSize: "0.85rem" }}>{error}</p>}
+      {error && <p style={{ color: "var(--danger)", fontSize: "12px", marginTop: "8px" }}>{error}</p>}
     </div>
   );
 }

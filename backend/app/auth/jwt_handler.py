@@ -2,9 +2,13 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
-from app.config.settings import settings
+from backend.app.config.settings import settings
+from typing import Optional
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+# auto_error=False so missing token doesn't immediately 401
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+
+GUEST_USER_ID = "guest"
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
@@ -22,5 +26,8 @@ def verify_token(token: str) -> dict:
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
+async def get_current_user(token: Optional[str] = Depends(oauth2_scheme)) -> dict:
+    """Returns the authenticated user, or a guest dict if no token is provided."""
+    if not token:
+        return {"user_id": GUEST_USER_ID}
     return verify_token(token)

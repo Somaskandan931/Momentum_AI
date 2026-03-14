@@ -1,11 +1,12 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import List, Optional
 from datetime import datetime
-from bson import ObjectId
+
 
 class ProductivityProfile(BaseModel):
     peak_hours: List[int] = []
     avg_task_completion_time: float = 0.0
+
 
 class UserCreate(BaseModel):
     name: str
@@ -13,6 +14,7 @@ class UserCreate(BaseModel):
     password: str
     skills: List[str] = []
     role: str = "Developer"
+
 
 class UserOut(BaseModel):
     id: str
@@ -22,6 +24,7 @@ class UserOut(BaseModel):
     role: str
     created_at: datetime
     productivity_profile: ProductivityProfile
+
 
 class UserInDB(BaseModel):
     name: str

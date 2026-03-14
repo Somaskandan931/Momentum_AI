@@ -1,13 +1,25 @@
-from app.database.mongodb import get_db
-from app.models.task_model import TaskInDB, TaskCreate, TaskUpdate
+"""
+Task Service — CRUD operations and productivity log management for tasks.
+"""
+
 from bson import ObjectId
 from datetime import datetime
 
+from backend.app.database.mongodb import get_db
+from backend.app.models.task_model import TaskInDB, TaskCreate, TaskUpdate
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
 def _serialize(task: dict) -> dict:
+    """Convert MongoDB _id to string id and stringify assigned_to ObjectId."""
     task["id"] = str(task.pop("_id"))
     if task.get("assigned_to"):
         task["assigned_to"] = str(task["assigned_to"])
     return task
+
+
+# ── CRUD ──────────────────────────────────────────────────────────────────────
 
 async def create_task(task_data: TaskCreate, created_by_ai: bool = False) -> dict:
     db = get_db()
@@ -16,26 +28,41 @@ async def create_task(task_data: TaskCreate, created_by_ai: bool = False) -> dic
     created = await db.tasks.find_one({"_id": result.inserted_id})
     return _serialize(created)
 
-async def get_tasks_by_project(project_id: str) -> list:
+
+async def get_tasks_by_project(project_id: str) -> list[dict]:
     db = get_db()
     tasks = []
     async for task in db.tasks.find({"project_id": project_id}):
         tasks.append(_serialize(task))
     return tasks
 
+
 async def update_task(task_id: str, updates: TaskUpdate) -> dict:
     db = get_db()
     update_data = {k: v for k, v in updates.dict().items() if v is not None}
-    await db.tasks.update_one({"_id": ObjectId(task_id)}, {"$set": update_data})
+    await db.tasks.update_one(
+        {"_id": ObjectId(task_id)},
+        {"$set": update_data},
+    )
     updated = await db.tasks.find_one({"_id": ObjectId(task_id)})
     return _serialize(updated)
 
-async def delete_task(task_id: str):
+
+async def delete_task(task_id: str) -> dict:
     db = get_db()
     await db.tasks.delete_one({"_id": ObjectId(task_id)})
     return {"message": "Task deleted"}
 
-async def log_task_completion(user_id: str, task_id: str, completion_time: int, delay_minutes: int, focus_score: float):
+
+# ── Productivity logging ───────────────────────────────────────────────────────
+
+async def log_task_completion(
+    user_id: str,
+    task_id: str,
+    completion_time: int,
+    delay_minutes: int,
+    focus_score: float,
+) -> None:
     db = get_db()
     log = {
         "user_id": user_id,
@@ -43,6 +70,6 @@ async def log_task_completion(user_id: str, task_id: str, completion_time: int, 
         "completion_time": completion_time,
         "delay_minutes": delay_minutes,
         "focus_score": focus_score,
-        "timestamp": datetime.utcnow()
+        "timestamp": datetime.utcnow(),
     }
     await db.productivity_logs.insert_one(log)

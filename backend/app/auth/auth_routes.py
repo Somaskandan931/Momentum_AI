@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Depends
 from passlib.context import CryptContext
-from app.database.mongodb import get_db
-from app.models.user_model import UserCreate, UserInDB, UserOut, ProductivityProfile
-from app.auth.jwt_handler import create_access_token
+from backend.app.database.mongodb import get_db
+from backend.app.models.user_model import UserCreate, UserInDB, UserOut, ProductivityProfile
+from backend.app.auth.jwt_handler import create_access_token
 from datetime import datetime
 
 router = APIRouter()

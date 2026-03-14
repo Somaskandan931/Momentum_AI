@@ -1,38 +1,77 @@
-import openai
-from app.config.settings import settings
-import json
+"""
+Trend Service — analyses market competition for a project idea via Groq.
+Uses the centralised config module so the API key is always resolved
+from Momentum_AI/.env regardless of the working directory.
+"""
 
-openai.api_key = settings.OPENAI_API_KEY
+import json
+from groq import Groq
+
+from backend.app.core.config import GROQ_API_KEY
+
+_client = Groq(api_key=GROQ_API_KEY)
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _clean_json(content: str) -> dict:
+    """Strip markdown fences and parse JSON."""
+    content = content.strip()
+
+    if content.startswith("```"):
+        lines = content.splitlines()
+        inner = lines[1:]
+        if inner and inner[-1].strip() == "```":
+            inner = inner[:-1]
+        content = "\n".join(inner).strip()
+
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid JSON returned from AI:\n{content}") from exc
+
+
+# ── Main service function ─────────────────────────────────────────────────────
 
 async def analyze_trend(idea: str) -> dict:
-    """Analyze market competition and suggest differentiators for a project idea."""
+    """
+    Analyse market competition and suggest differentiators for a project idea.
+
+    Returns a dict with:
+        competition_level, existing_solutions, suggested_improvements, innovation_score
+    """
+
     prompt = f"""
-You are a startup idea analyst. Analyze the following project idea for market saturation and competition:
+You are a startup idea analyst.
+
+Analyse the following project idea:
 
 "{idea}"
 
-Return ONLY a JSON object with:
-- "competition_level": one of "low", "medium", "high"
-- "existing_solutions": list of 3 existing similar tools (names only)
-- "suggested_improvements": list of 3 specific feature ideas to differentiate
-- "innovation_score": integer from 1 to 10
+Return ONLY valid JSON with exactly these keys:
 
-Example:
 {{
-  "competition_level": "high",
-  "existing_solutions": ["Notion", "Trello", "Asana"],
-  "suggested_improvements": ["Add AI-generated task breakdown", "Integrate voice commands", "Include burnout prediction"],
-  "innovation_score": 6
+  "competition_level": "low | medium | high",
+  "existing_solutions": ["tool1", "tool2", "tool3"],
+  "suggested_improvements": ["feature1", "feature2", "feature3"],
+  "innovation_score": 7
 }}
+
+No markdown. No explanations. Only JSON.
 """
-    response = openai.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3
-    )
-    content = response.choices[0].message.content.strip()
-    if content.startswith("```"):
-        content = content.split("```")[1]
-        if content.startswith("json"):
-            content = content[4:]
-    return json.loads(content)
+
+    try:
+        response = _client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "system", "content": "You return strictly valid JSON only. No markdown, no prose."},
+                {"role": "user",   "content": prompt},
+            ],
+            temperature=0.3,
+        )
+
+        content = response.choices[0].message.content
+        return _clean_json(content)
+
+    except Exception as e:
+        raise RuntimeError(f"Trend analysis failed: {e}") from e

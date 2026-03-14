@@ -1,4 +1,4 @@
-from app.database.mongodb import get_db
+from backend.app.database.mongodb import get_db
 
 async def init_collections():
     db = get_db()
