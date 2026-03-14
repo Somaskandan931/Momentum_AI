@@ -240,28 +240,13 @@ Momentum AI is built on a modular four-layer architecture separating the fronten
 └──────────────────────────────────────────────┘
 ```
 
-### Mermaid Diagram
 
-```mermaid
-graph TD
-    A[React Frontend] --> B[FastAPI Backend]
-    B --> C[Idea Planner AI]
-    B --> D[RL Scheduler]
-    B --> E[Trend Analyzer]
-    B --> F[Survival Score Predictor]
-    C --> G[(MongoDB)]
-    D --> G
-    E --> G
-    F --> G
-    B --> H[Google Calendar]
-    B --> I[Email / SMS Notifications]
-    B --> J[GitHub Activity Tracker]
-```
 <div align="center">
   <img src="architecture_diagram.png" alt="System Architecture Diagram" width="750"/>
   <br/>
   <sub><b>Figure 1:</b> Momentum AI system architecture — showing the full flow from React frontend through FastAPI backend to the AI engine, MongoDB, and external integrations.</sub>
 </div>
+
 ---
 
 ## AI Pipeline
