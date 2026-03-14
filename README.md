@@ -257,7 +257,11 @@ graph TD
     B --> I[Email / SMS Notifications]
     B --> J[GitHub Activity Tracker]
 ```
-
+<div align="center">
+  <img src="architecture_diagram.png" alt="System Architecture Diagram" width="750"/>
+  <br/>
+  <sub><b>Figure 1:</b> Momentum AI system architecture — showing the full flow from React frontend through FastAPI backend to the AI engine, MongoDB, and external integrations.</sub>
+</div>
 ---
 
 ## AI Pipeline
@@ -332,6 +336,16 @@ actions = [
 | Task delayed unnecessarily | `-0.4` |
 
 The agent continuously refines its policy through interaction with real user productivity data stored in the `productivity_logs` collection, becoming increasingly personalized with use.
+
+### RL Training — Reward Progression
+
+The chart below shows the cumulative reward earned by the PPO agent across training episodes, demonstrating convergence toward an optimal scheduling policy.
+
+<div align="center">
+  <img src="models/rl_eval_rewards.png" alt="RL Scheduler Evaluation — Reward Progression" width="750"/>
+  <br/>
+  <sub><b>Figure 1:</b> PPO agent reward progression across training episodes. The agent converges toward optimal scheduling behaviour as it learns from simulated productivity interactions.</sub>
+</div>
 
 ---
 
@@ -457,6 +471,11 @@ momentum-ai/
 │   │
 │   └── github_activity/
 │       └── activity_analyzer.py
+│
+├── models/                          # Trained model assets & evaluation charts
+│   ├── dataset_exploration.png
+│   ├── rl_eval_rewards.png
+│   └── survival_score_results.png
 │
 ├── data/
 │   ├── training_data/
@@ -625,6 +644,16 @@ Momentum AI uses **MongoDB** — a NoSQL document database suited for the flexib
 
 The RL scheduler is evaluated against three baseline scheduling methods to validate its effectiveness.
 
+### Dataset Exploration
+
+The training dataset was analyzed to understand the distribution of task priorities, estimated durations, and productivity patterns across simulated user profiles.
+
+<div align="center">
+  <img src="models/dataset_exploration.png" alt="Dataset Exploration" width="750"/>
+  <br/>
+  <sub><b>Figure 2:</b> Exploratory data analysis of the training dataset — showing distributions of task priorities, estimated durations, delay patterns, and focus scores across simulated user profiles.</sub>
+</div>
+
 ### Baseline Comparisons
 
 | Baseline | Description |
@@ -648,6 +677,16 @@ The RL scheduler is evaluated against three baseline scheduling methods to valid
 2. All four scheduling strategies are applied to identical task sets
 3. The RL agent trains through repeated interactions with the scheduling environment
 4. Performance is measured across training episodes and compared against all baselines
+
+### Survival Score Model — Results
+
+The Idea Survival Score predictor was trained on simulated project outcome data. The chart below shows model performance across evaluation folds.
+
+<div align="center">
+  <img src="models/survival_score_results.png" alt="Survival Score Model Results" width="750"/>
+  <br/>
+  <sub><b>Figure 3:</b> Idea Survival Score predictor evaluation — showing model accuracy, predicted vs. actual score distributions, and feature importance rankings from the XGBoost pipeline.</sub>
+</div>
 
 ### Expected Outcomes
 
